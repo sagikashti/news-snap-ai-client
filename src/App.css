@@ -100,15 +100,16 @@ body {
   min-height: 100vh;
   min-width: 100vw;
   background-color: var(--color-bg-primary);
+  overflow-x: hidden;
 }
 
 /* App Container */
 .app-container {
   min-height: 100vh;
-  min-width: 100vw;
-  border-color: #10b981;
+  width: 100vw;
   display: flex;
   justify-content: center;
+  overflow-x: hidden;
 }
 .app {
   min-height: 100vh;
@@ -186,8 +187,9 @@ body {
   padding: var(--spacing-xl) var(--spacing-md);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   min-height: calc(100vh - 200px); /* Account for header/footer */
+  overflow-y: auto;
 }
 
 .summary-page__container {
@@ -465,6 +467,9 @@ body {
   border-radius: var(--radius-xl);
   padding: var(--spacing-xl);
   box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .summary-display__header {
@@ -502,8 +507,95 @@ body {
   color: var(--color-text-muted);
 }
 
+.summary-display__author-container {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
+  flex-shrink: 1;
+  min-width: 0;
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+
+.summary-display__author {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  flex-shrink: 1;
+  min-width: 0; /* Allow flex item to shrink below content size */
+  transition: all var(--transition-fast);
+}
+
+.summary-display__author:not(.summary-display__author--expanded) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.summary-display__author--expanded {
+  white-space: normal;
+  word-break: break-word;
+  overflow: visible;
+  background-color: var(--color-bg-tertiary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  margin: -var(--spacing-xs) -var(--spacing-sm);
+}
+
+.summary-display__author-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-secondary);
+}
+
+.summary-display__author-toggle:hover {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+.summary-display__author-toggle:focus {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+.summary-display__author-arrow {
+  font-size: 0.75rem;
+  transition: transform var(--transition-fast);
+  line-height: 1;
+}
+
+.summary-display__author-arrow--expanded {
+  transform: rotate(180deg);
+}
+
+.summary-display__time,
+.summary-display__reading-time,
+.summary-display__summary-length {
+  color: var(--color-text-secondary);
+  flex-shrink: 0; /* Prevent these from shrinking */
+  white-space: nowrap;
+}
+
+.summary-display__url {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
 .summary-display__content {
   margin-bottom: var(--spacing-xl);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .summary-display__paragraph {
@@ -971,6 +1063,7 @@ body {
     align-items: flex-start;
     min-height: auto;
     padding: var(--spacing-lg) var(--spacing-md);
+    overflow-y: auto;
   }
 
   .summary-page__header-content {
@@ -1005,6 +1098,29 @@ body {
   .summary-display__separator {
     display: none;
   }
+
+  .summary-display__author-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+    width: 100%;
+  }
+
+  .summary-display__author {
+    white-space: normal; /* Allow wrapping on mobile */
+    max-width: 100%;
+    word-break: break-word;
+    text-overflow: unset;
+    overflow: visible;
+  }
+
+  .summary-display__author-toggle {
+    align-self: flex-start;
+    margin-top: var(--spacing-xs);
+    width: 24px;
+    height: 24px;
+    padding: var(--spacing-sm);
+  }
 }
 
 @media (max-width: 480px) {
@@ -1012,6 +1128,7 @@ body {
     padding: var(--spacing-lg) var(--spacing-sm);
     align-items: flex-start;
     min-height: auto;
+    overflow-y: auto;
   }
 
   .summary-page__header {

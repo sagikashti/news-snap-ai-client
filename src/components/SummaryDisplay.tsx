@@ -13,6 +13,7 @@ interface SummaryDisplayProps extends BaseComponentProps {
  */
 export const SummaryDisplay = memo<SummaryDisplayProps>(({ summary, onCopy, className = '' }) => {
   const [copied, setCopied] = useState(false);
+  const [authorExpanded, setAuthorExpanded] = useState(false);
 
   const handleCopy = async () => {
     try {
@@ -29,6 +30,25 @@ export const SummaryDisplay = memo<SummaryDisplayProps>(({ summary, onCopy, clas
 
   const handleOpenOriginal = () => {
     window.open(summary.originalUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const toggleAuthorExpanded = () => {
+    console.log('Toggle author expanded:', !authorExpanded);
+    setAuthorExpanded(!authorExpanded);
+  };
+
+  // Helper function to determine if author section needs expansion
+  const needsExpansion = (authors: string[]) => {
+    const authorText = authors.join(', ');
+    return authorText.length > 20 || authors.length > 1;
+  };
+
+  // Helper function to get truncated author text
+  const getTruncatedAuthors = (authors: string[]) => {
+    if (authors.length <= 1) {
+      return authors.join(', ');
+    }
+    return `${authors[0]}${authors.length > 1 ? ` +${authors.length - 1} more` : ''}`;
   };
 
   return (
@@ -52,7 +72,28 @@ export const SummaryDisplay = memo<SummaryDisplayProps>(({ summary, onCopy, clas
           {summary.author && summary.author.length > 0 && (
             <>
               <span className="summary-display__separator">•</span>
-              <span className="summary-display__author">By {summary.author.join(', ')}</span>
+              <div className="summary-display__author-container">
+                <span
+                  className={`summary-display__author ${authorExpanded ? 'summary-display__author--expanded' : ''}`}
+                >
+                  By{' '}
+                  {authorExpanded ? summary.author.join(', ') : getTruncatedAuthors(summary.author)}
+                </span>
+                {needsExpansion(summary.author) && (
+                  <button
+                    onClick={toggleAuthorExpanded}
+                    className="summary-display__author-toggle"
+                    aria-label={authorExpanded ? 'Show less authors' : 'Show all authors'}
+                    aria-expanded={authorExpanded}
+                  >
+                    <span
+                      className={`summary-display__author-arrow ${authorExpanded ? 'summary-display__author-arrow--expanded' : ''}`}
+                    >
+                      ▼
+                    </span>
+                  </button>
+                )}
+              </div>
             </>
           )}
 
