@@ -33,6 +33,20 @@ export interface LoadingState {
   error: string | null;
 }
 
+// Retry Types
+export interface RetryState {
+  attempt: number;
+  maxAttempts: number;
+  isRetrying: boolean;
+  lastError?: string;
+}
+
+export interface RetryOptions {
+  maxAttempts?: number;
+  delay?: number;
+  backoff?: boolean;
+}
+
 // Form Types
 export interface UrlFormData {
   url: string;

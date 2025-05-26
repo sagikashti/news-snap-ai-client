@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import toast from 'react-hot-toast';
 import SummaryService from '../../services/summaryService';
-import type { SummaryRequest, SummaryResponse, LoadingState } from '../../types';
+import type { SummaryRequest, SummaryResponse, LoadingState, RetryState } from '../../types';
 
 // Async thunk for summarizing URL
 export const summarizeUrl = createAsyncThunk(
@@ -24,6 +25,7 @@ interface SummaryState extends LoadingState {
   currentSummary: SummaryResponse | null;
   history: SummaryResponse[];
   lastUrl: string | null;
+  retry: RetryState;
 }
 
 // Initial state
@@ -33,6 +35,12 @@ const initialState: SummaryState = {
   currentSummary: null,
   history: [],
   lastUrl: null,
+  retry: {
+    attempt: 0,
+    maxAttempts: 3,
+    isRetrying: false,
+    lastError: undefined,
+  },
 };
 
 // Summary slice
@@ -42,10 +50,19 @@ const summarySlice = createSlice({
   reducers: {
     clearError: (state) => {
       state.error = null;
+      state.retry.lastError = undefined;
+      // Dismiss any existing toasts when manually clearing errors
+      toast.dismiss();
     },
     clearCurrentSummary: (state) => {
       state.currentSummary = null;
       state.lastUrl = null;
+      state.retry = {
+        attempt: 0,
+        maxAttempts: 3,
+        isRetrying: false,
+        lastError: undefined,
+      };
     },
     addToHistory: (state, action) => {
       const summary = action.payload as SummaryResponse;
@@ -73,11 +90,22 @@ const summarySlice = createSlice({
         state.isLoading = true;
         state.error = null;
         state.lastUrl = action.meta.arg.url;
+        state.retry.attempt = 0;
+        state.retry.isRetrying = false;
+        state.retry.lastError = undefined;
+        // Dismiss any existing toasts when starting new request
+        toast.dismiss();
       })
       .addCase(summarizeUrl.fulfilled, (state, action) => {
         state.isLoading = false;
         state.error = null;
         state.currentSummary = action.payload;
+        state.retry = {
+          attempt: 0,
+          maxAttempts: 3,
+          isRetrying: false,
+          lastError: undefined,
+        };
 
         // Add to history
         const exists = state.history.some(
@@ -94,6 +122,8 @@ const summarySlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
         state.currentSummary = null;
+        state.retry.lastError = action.payload as string;
+        state.retry.isRetrying = false;
       });
   },
 });

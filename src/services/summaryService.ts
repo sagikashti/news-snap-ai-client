@@ -1,6 +1,7 @@
 import { api } from './api';
 import { config } from '../config';
-import type { SummaryRequest, SummaryResponse, ApiResult } from '../types';
+import toast from 'react-hot-toast';
+import type { SummaryRequest, SummaryResponse, ApiResult, RetryOptions } from '../types';
 
 interface RawApiResponse {
   status: string;
@@ -55,13 +56,52 @@ export function normalizeSummaryResponse(apiResponse: RawApiResponse): ApiResult
 
 export class SummaryService {
   /**
-   * Summarize content from a URL
+   * Extract domain name from URL for user feedback
+   */
+  private static extractDomainName(url: string): string {
+    try {
+      const urlObj = new URL(url);
+      return urlObj.hostname.replace('www.', '');
+    } catch {
+      return 'the article';
+    }
+  }
+
+  /**
+   * Summarize content from a URL with enhanced retry logic and user feedback
    * @param request - The summary request containing the URL
    * @returns Promise with the summary response
    */
   static async summarizeUrl(request: SummaryRequest): Promise<ApiResult<SummaryResponse>> {
+    // Cancel any existing toasts before starting new request
+    toast.dismiss();
+
+    const domainName = this.extractDomainName(request.url);
+
+    // Show initial toast with URL context
+    const initialToastId = toast.loading(`📖 Analyzing content from ${domainName}...`, {
+      duration: 2000, // Show for 2 seconds minimum
+    });
+
     try {
-      const result = await api.post<RawApiResponse>(config.endpoints.summarize, request);
+      // Custom retry options for summary API
+      const retryOptions: RetryOptions = {
+        maxAttempts: 3,
+        delay: 2000, // 2 seconds base delay
+        backoff: true, // Exponential backoff
+      };
+
+      // Wait longer before transitioning to the next toast (let users read the analysis message)
+      setTimeout(() => toast.dismiss(initialToastId), 1500);
+
+      // Small delay to ensure users see the analysis message before API processing starts
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+
+      const result = await api.post<RawApiResponse>(
+        config.endpoints.summarize,
+        request,
+        retryOptions
+      );
 
       if (result.success && result.data) {
         return normalizeSummaryResponse(result.data);
@@ -72,6 +112,8 @@ export class SummaryService {
         };
       }
     } catch (error) {
+      // Dismiss initial toast on error
+      toast.dismiss(initialToastId);
       throw error;
     }
   }

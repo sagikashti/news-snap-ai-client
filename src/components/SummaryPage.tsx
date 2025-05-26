@@ -16,14 +16,28 @@ interface SummaryPageProps extends BaseComponentProps {}
 export const SummaryPage = memo<SummaryPageProps>(({ className = '' }) => {
   const dispatch = useAppDispatch();
   const { isLoading, error, currentSummary, lastUrl } = useAppSelector((state) => state.summary);
-  // Clear error when component mounts
+  // Clear error when component mounts (but let toast notifications handle API errors)
   useEffect(() => {
     if (error) {
-      const timer = setTimeout(() => {
-        dispatch(clearError());
-      }, 5000); // Auto-clear error after 5 seconds
+      // Only auto-clear non-API errors (form validation errors, etc.)
+      // API errors are now handled by toast notifications
+      const isApiError =
+        error.includes('Failed to summarize') ||
+        error.includes('Network error') ||
+        error.includes('Server error') ||
+        error.includes('timeout') ||
+        error.includes('Service temporarily unavailable');
 
-      return () => clearTimeout(timer);
+      if (!isApiError) {
+        const timer = setTimeout(() => {
+          dispatch(clearError());
+        }, 5000); // Auto-clear non-API errors after 5 seconds
+
+        return () => clearTimeout(timer);
+      } else {
+        // For API errors, clear immediately since toast will handle the display
+        dispatch(clearError());
+      }
     }
   }, [error, dispatch]);
 
@@ -63,26 +77,36 @@ export const SummaryPage = memo<SummaryPageProps>(({ className = '' }) => {
             />
           </section>
 
-          {/* Error Display */}
-          {error && (
-            <section className="summary-page__error-section">
-              <div className="summary-page__error" role="alert">
-                <div className="summary-page__error-content">
-                  <span className="summary-page__error-icon">⚠️</span>
-                  <div className="summary-page__error-text">
-                    <strong>Error:</strong> {error}
+          {/* Error Display - Only for non-API errors (form validation, etc.) */}
+          {error &&
+            (() => {
+              const isApiError =
+                error.includes('Failed to summarize') ||
+                error.includes('Network error') ||
+                error.includes('Server error') ||
+                error.includes('timeout') ||
+                error.includes('Service temporarily unavailable');
+
+              return !isApiError ? (
+                <section className="summary-page__error-section">
+                  <div className="summary-page__error" role="alert">
+                    <div className="summary-page__error-content">
+                      <span className="summary-page__error-icon">⚠️</span>
+                      <div className="summary-page__error-text">
+                        <strong>Error:</strong> {error}
+                      </div>
+                      <button
+                        onClick={handleClearError}
+                        className="summary-page__error-close"
+                        aria-label="Dismiss error"
+                      >
+                        ✕
+                      </button>
+                    </div>
                   </div>
-                  <button
-                    onClick={handleClearError}
-                    className="summary-page__error-close"
-                    aria-label="Dismiss error"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-            </section>
-          )}
+                </section>
+              ) : null;
+            })()}
 
           {/* Loading State */}
           {isLoading && (

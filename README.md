@@ -6,6 +6,8 @@ A modern React + TypeScript web application that provides AI-powered article sum
 
 - **URL Validation**: Real-time validation using Zod schemas
 - **AI Summarization**: Get concise summaries of any article
+- **Smart Retry System**: 3-attempt retry with exponential backoff for API failures
+- **Real-time Feedback**: Animated toast notifications with progress indicators
 - **Key Insights**: Extract important points and keywords
 - **Dark/Light Theme**: Toggle between themes with system preference detection
 - **Responsive Design**: Mobile-first design with modern UI
@@ -21,7 +23,8 @@ A modern React + TypeScript web application that provides AI-powered article sum
 - **State Management**: Redux Toolkit
 - **Routing**: React Router v7
 - **Forms**: React Hook Form + Zod validation
-- **HTTP Client**: Axios with interceptors
+- **HTTP Client**: Axios with interceptors & retry logic
+- **Notifications**: React Hot Toast with animations
 - **Styling**: CSS Variables with theme support
 - **Testing**: Vitest + React Testing Library
 - **Code Quality**: ESLint + Prettier
