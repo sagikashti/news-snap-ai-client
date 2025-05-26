@@ -26,22 +26,24 @@ function App() {
       <ErrorBoundary>
         <AppInitializer>
           <Router>
-            <div className="app">
-              <Routes>
-                <Route path="/" element={<SummaryPage />} />
-                <Route
-                  path="*"
-                  element={
-                    <div className="app__not-found">
-                      <h1>404 - Page Not Found</h1>
-                      <p>The page you're looking for doesn't exist.</p>
-                      <a href="/" className="app__home-link">
-                        Go Home
-                      </a>
-                    </div>
-                  }
-                />
-              </Routes>
+            <div className="app-container">
+              <div className="app">
+                <Routes>
+                  <Route path="/" element={<SummaryPage />} />
+                  <Route
+                    path="*"
+                    element={
+                      <div className="app__not-found">
+                        <h1>404 - Page Not Found</h1>
+                        <p>The page you're looking for doesn't exist.</p>
+                        <a href="/" className="app__home-link">
+                          Go Home
+                        </a>
+                      </div>
+                    }
+                  />
+                </Routes>
+              </div>
             </div>
           </Router>
         </AppInitializer>
