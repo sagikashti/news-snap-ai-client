@@ -5,15 +5,15 @@ import type { ThemeState, ThemeMode } from '../../types';
 const getInitialTheme = (): ThemeMode => {
   try {
     const savedTheme = localStorage.getItem('theme') as ThemeMode;
+
     if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
       return savedTheme;
     }
   } catch (error) {
     console.error('Error reading theme from localStorage:', error);
   }
-
-  // Default to system preference
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  // Default to light theme
+  return 'dark';
 };
 
 // Initial state
